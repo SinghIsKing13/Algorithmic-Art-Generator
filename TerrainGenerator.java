@@ -109,7 +109,7 @@ private double simpleNoise(double x, double y) {
         return smoothInterpolation(bottomBlend, topBlend, deltaY);
     }
 
-    // this method is pretty much ai as i could not find a simple value algorithm anywhere
+    // this method was heavily helped by ai as i could not find a simple value algorithm anywhere
     private double getNoiseValue(int x, int y) {
         int hash = (x * 374761393 + y * 668265263 + currentSeed.hashCode()) % Integer.MAX_VALUE; //this takes the coordinates and creates a random number that is always the same same for those coordinates and seed.
         if (hash < 0)

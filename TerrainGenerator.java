@@ -1,6 +1,6 @@
-import javax.swing.*;
 import java.awt.*;
 import java.util.Random;
+import javax.swing.*;
 
 public class TerrainGenerator extends JFrame {
     private TerrainPanel terrainPanel;
@@ -73,14 +73,14 @@ public class TerrainGenerator extends JFrame {
                 // with the following simpleNoise method calls, x and y are multiplied by values
                 // i wanted changes in elevations for very simple things
                 // the numbers came from ai because I genuinely didnt know what numbers would be good.
-                elevation += simpleNoise(x * 0.005, y * 0.005) * 0.5; //for big changes like islands or continents
+                elevation += simpleNoise(x * 0.005, y * 0.005) * 0.6; //for big changes like islands or continents
                 elevation += simpleNoise(x * 0.05, y * 0.05) * 0.3; // for smaller things like hills and valleys
                 elevation += simpleNoise(x * 0.1, y * 0.1) * 0.1; //for smallest things like land imperfections or something
                 //basically, 60% of the elevation is island/continent, 30% hills/valleys, and 10% imperfections
 
-                // if (elevation > 0.4) {
-                //     elevation = 0.4 + (elevation - 0.4) * 1.6; //I wanted to make the mountains more prominent
-                // }
+                if (elevation > 0.4) {
+                    elevation = 0.4 + (elevation - 0.4) * 1.4; //I wanted to make the mountains more prominent
+                }
     
                 elevationMap[x][y] = elevation;
             }

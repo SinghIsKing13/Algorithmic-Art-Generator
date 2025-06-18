@@ -7,19 +7,20 @@ public class TerrainGenerator extends JFrame {
     private JTextField seedInput;
     private JButton generateButton;
     private JButton randomSeedButton;
-    private String currentSeed;
+    private String currentSeed = "seed"; //it needs default string otherwise program crashes
     private static final int SIZE = 400;
     private double[][] elevationMap;
 
     public TerrainGenerator() {
         setupUI();
+        generate();
     }
 
     private void setupUI() {
         setTitle("Terrain Generator");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout()); // learned about layouts from previous project
-        terrainPanel = new TerrainPanel();
+        terrainPanel = new TerrainPanel(this);
         terrainPanel.setPreferredSize(new Dimension(SIZE, SIZE)); //searched google how to set size cuz i forgot, also includes pack feature below
         add(terrainPanel, BorderLayout.CENTER);
 
@@ -32,11 +33,7 @@ public class TerrainGenerator extends JFrame {
         generateButton = new JButton("Generate");
         generateButton.addActionListener(e -> {
             currentSeed = seedInput.getText();
-            try {
-                generate();
-            } catch(Exception lol) {
-                System.out.println("Improper Seed");
-            }
+            generate();
         });
         controlPanel.add(generateButton);
 
@@ -58,11 +55,11 @@ public class TerrainGenerator extends JFrame {
         String potentials = "abcdefghijklmnopqrstuvwxyz0123456789";
         String seed = new String();
         Random random = new Random();
-        for (int i = 0; i < random.nextInt(potentials.length()) + 1; i++) {
+        for (int i = 0; i < random.nextInt(8) + 3; i++) {
             seed += (potentials.charAt(random.nextInt(potentials.length())));
         }
         System.out.println(seed);
-        return seed;
+        return seed;    
     }
 
     private void generate() {
@@ -81,6 +78,10 @@ public class TerrainGenerator extends JFrame {
                 elevation += simpleNoise(x * 0.1, y * 0.1) * 0.1; //for smallest things like land imperfections or something
                 //basically, 60% of the elevation is island/continent, 30% hills/valleys, and 10% imperfections
 
+                // if (elevation > 0.4) {
+                //     elevation = 0.4 + (elevation - 0.4) * 1.6; //I wanted to make the mountains more prominent
+                // }
+    
                 elevationMap[x][y] = elevation;
             }
         }
@@ -94,7 +95,7 @@ private double simpleNoise(double x, double y) {
         int topY = bottomY + 1;
         
         // this will get values for each of the corners based on the seed
-        double bottomLeft = getNoiseValue(leftX, bottomY); //nTR means n Top Right
+        double bottomLeft = getNoiseValue(leftX, bottomY);
         double bottomRight = getNoiseValue(rightX, bottomY);
         double topLeft = getNoiseValue(leftX, topY);
         double topRight = getNoiseValue(rightX, topY);
@@ -124,5 +125,49 @@ private double simpleNoise(double x, double y) {
     // see same article: https://glusoft.com/sdl3-tutorials/procedural-terrain-perlin-noise/
     private double smoothInterpolation(double x, double y, double s) {
         return linearInterpolation(x, y, s * s * (3 - 2 * s)); // creates s curve instead of blockyness
+    }
+
+    public Color getTerrainColor(double elevation) {
+        elevation = Math.max(0, Math.min(1, elevation)); //i dont know if i acc need this line but its too make sure its between 0-1
+        
+        // i created the elevation approximations then asked ai to give me realistic colors as I am not a color theory master :)
+        // the factors numbers are also generated from ai, but i had the idea of doing two colors getting blended thing based on how far the elevation is from the next or previous elevation
+
+        if (elevation < 0.15) {
+            //ocean
+            return new Color(0, 50, 120);
+        } else if (elevation < 0.25) { //shallow water
+            return blendColor(new Color(0, 50, 120), new Color(30, 100, 180), (elevation - 0.15) / 0.1);
+        } else if (elevation < 0.3) { // beach
+            return blendColor(new Color(30, 100, 180), new Color(194, 178, 128), (elevation - 0.25) / 0.05);
+        } else if (elevation < 0.5) { // grass
+            return blendColor(new Color(194, 178, 128), new Color(80, 120, 40), (elevation - 0.3) / 0.2);
+        } else if (elevation < 0.7) { //higher so darker grass or trees
+            return blendColor(new Color(80, 120, 40), new Color(40, 80, 20), (elevation - 0.5) / 0.2);
+        } else if (elevation < 0.85) { //mountains
+            return blendColor(new Color(40, 80, 20), new Color(85, 85, 85), (elevation - 0.7) / 0.15);
+        } else { //peak snow
+            return blendColor(new Color(120, 100, 80), new Color(240, 240, 240), (elevation - 0.85) / 0.15);
+        }
+    }
+    
+    private Color blendColor(Color colorOne, Color colorTwo, double factor) {
+        factor = Math.max(0, Math.min(1, factor)); //make sure factor is inside 0-1
+
+        int red = (int) (colorOne.getRed() + factor * (colorTwo.getRed() - colorOne.getRed()));
+        int green = (int) (colorOne.getGreen() + factor * (colorTwo.getGreen() - colorOne.getGreen()));
+        int blue = (int) (colorOne.getBlue() + factor * (colorTwo.getBlue() - colorOne.getBlue()));
+        
+        return new Color(red, green, blue);
+    }
+
+    public int getTerrainSize() {
+        return SIZE;
+    }
+
+    public double getElevation(int x, int y) {
+        if (elevationMap == null)
+            return 0.0;
+        return elevationMap[x][y];
     }
 }

@@ -10,7 +10,7 @@ public class TerrainGenerator extends JFrame {
     private String currentSeed = "seed"; //it needs default string otherwise program crashes
     private static final int SIZE = 400;
     private double[][] elevationMap;
-
+    
     public TerrainGenerator() {
         setupUI();
         generate();
@@ -147,7 +147,7 @@ private double simpleNoise(double x, double y) {
         } else if (elevation < 0.85) { //mountains
             return blendColor(new Color(40, 80, 20), new Color(85, 85, 85), (elevation - 0.7) / 0.15);
         } else { //peak snow
-            return blendColor(new Color(120, 100, 80), new Color(240, 240, 240), (elevation - 0.85) / 0.15);
+            return blendColor(new Color(85, 85, 85), new Color(240, 240, 240), (elevation - 0.85) / 0.15);
         }
     }
     
